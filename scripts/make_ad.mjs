@@ -83,7 +83,7 @@ if (stage === "video") {
     duration: Number(opt("duration", 15)),
     resolution: opt("resolution", "768P"),
   };
-  const model = opt("model", "h3");
+  const model = opt("model", "h3-max");
   if (!["h3", "h3-max"].includes(model)) throw new Error("--model must be h3 or h3-max");
   let endpoint = model === "h3-max" ? "minimax/h3-max/image-to-video" : "minimax/h3/image-to-video";
   if (model === "h3-max") input.prompt_expansion_mode = "balanced";

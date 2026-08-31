@@ -84,7 +84,7 @@ export default function Home() {
   const [videoPrompt, setVideoPrompt] = useState("");
   const [duration, setDuration] = useState(10);
   const [resolution, setResolution] = useState("768P");
-  const [videoModel, setVideoModel] = useState("h3");
+  const [videoModel, setVideoModel] = useState("h3-max");
   const [loraUrl, setLoraUrl] = useState(
     "https://huggingface.co/fal/MiniMax-H3-Realism-People-LoRA/resolve/main/h3-realism-people-t2v-i2v-r2v.safetensors"
   );
@@ -321,8 +321,8 @@ export default function Home() {
                 if (next === "h3-max" && !["480P", "768P"].includes(resolution)) setResolution("768P");
               }}
             >
-              <option value="h3">MiniMax H3 (default)</option>
-              <option value="h3-max">MiniMax H3 Max</option>
+              <option value="h3-max">MiniMax H3 Max (default)</option>
+              <option value="h3">MiniMax H3</option>
             </select>
           </div>
           <div>

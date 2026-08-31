@@ -18,7 +18,7 @@ export async function POST(req) {
       end_image_url,
       duration,
       resolution,
-      model = "h3",
+      model = "h3-max",
       lora_url,
       lora_scale,
     } = await req.json();
