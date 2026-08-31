@@ -5,6 +5,11 @@ import { useEffect, useState } from "react";
 const ASPECT_RATIOS = ["9:16", "4:5", "1:1", "16:9"];
 const RESOLUTIONS = ["480P", "768P", "2K", "4K"];
 
+function estimatedVideoCost(model, duration, resolution) {
+  const seconds = Number(duration) || 0;
+  return seconds * (model === "h3-max" ? (resolution === "480P" ? 0.025 : 0.04) : 0.26);
+}
+
 function FramePanel({ title, prompt, setPrompt, image, loading, error, onGenerate }) {
   return (
     <div>
@@ -77,8 +82,9 @@ export default function Home() {
   const [endError, setEndError] = useState(null);
 
   const [videoPrompt, setVideoPrompt] = useState("");
-  const [duration, setDuration] = useState(5);
+  const [duration, setDuration] = useState(10);
   const [resolution, setResolution] = useState("768P");
+  const [videoModel, setVideoModel] = useState("h3");
   const [loraUrl, setLoraUrl] = useState(
     "https://huggingface.co/fal/MiniMax-H3-Realism-People-LoRA/resolve/main/h3-realism-people-t2v-i2v-r2v.safetensors"
   );
@@ -130,6 +136,7 @@ export default function Home() {
           end_image_url: endImage,
           duration,
           resolution,
+          model: videoModel,
           lora_url: loraUrl,
           lora_scale: loraScale,
         }),
@@ -170,7 +177,7 @@ export default function Home() {
     <main>
       <h1>FB Video Ad Maker</h1>
       <p className="subtitle">
-        nano-banana-2 keyframes → MiniMax H3 image-to-video, via fal.ai
+        nano-banana-2 keyframes → MiniMax H3 / H3 Max image-to-video, via fal.ai
       </p>
 
       <details className="step guide">
@@ -294,7 +301,7 @@ export default function Home() {
 
       <div className="step">
         <h2>
-          2. Video <span>MiniMax H3 animates start → end</span>
+          2. Video <span>MiniMax H3 / H3 Max animates start → end</span>
         </h2>
         <label>Video prompt (motion, camera, transition)</label>
         <textarea
@@ -304,6 +311,20 @@ export default function Home() {
           placeholder="e.g. slow dolly-in, product rotates and lands in the final composition, soft light sweep…"
         />
         <div className="row">
+          <div>
+            <label>Video model</label>
+            <select
+              value={videoModel}
+              onChange={(e) => {
+                const next = e.target.value;
+                setVideoModel(next);
+                if (next === "h3-max" && !["480P", "768P"].includes(resolution)) setResolution("768P");
+              }}
+            >
+              <option value="h3">MiniMax H3 (default)</option>
+              <option value="h3-max">MiniMax H3 Max</option>
+            </select>
+          </div>
           <div>
             <label>Duration (seconds)</label>
             <input
@@ -317,7 +338,7 @@ export default function Home() {
           <div>
             <label>Resolution</label>
             <select value={resolution} onChange={(e) => setResolution(e.target.value)}>
-              {RESOLUTIONS.map((r) => (
+              {RESOLUTIONS.filter((r) => videoModel === "h3-max" ? ["480P", "768P"].includes(r) : true).map((r) => (
                 <option key={r} value={r}>
                   {r}
                 </option>
@@ -346,8 +367,14 @@ export default function Home() {
           </div>
         </div>
         <p className="hint">
-          The /lora endpoint requires a trained LoRA adapter — with the field empty, the
-          base minimax/h3/image-to-video endpoint is used with the same first/last frames.
+          {videoModel === "h3-max"
+            ? "H3 Max uses balanced prompt expansion and supports 480P or 768P."
+            : "H3 uses the same first and last frames; the optional LoRA can improve realistic human motion."}
+        </p>
+        <p className="hint">
+          Estimated video charge: <b>${estimatedVideoCost(videoModel, duration, resolution).toFixed(2)}</b>
+          {videoModel === "h3-max" ? " at the current H3 Max promotional rate" : " for standard H3 at 2K"}.
+          Fal charges per generation; keyframe generation is separate. Prices and promotions can change—confirm current pricing on Fal before generating.
         </p>
         <button
           onClick={generateVideo}

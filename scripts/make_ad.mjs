@@ -83,8 +83,11 @@ if (stage === "video") {
     duration: Number(opt("duration", 15)),
     resolution: opt("resolution", "768P"),
   };
-  let endpoint = "minimax/h3/image-to-video";
-  if (!flag("no-lora")) {
+  const model = opt("model", "h3");
+  if (!["h3", "h3-max"].includes(model)) throw new Error("--model must be h3 or h3-max");
+  let endpoint = model === "h3-max" ? "minimax/h3-max/image-to-video" : "minimax/h3/image-to-video";
+  if (model === "h3-max") input.prompt_expansion_mode = "balanced";
+  if (model === "h3" && !flag("no-lora")) {
     endpoint = "minimax/h3/image-to-video/lora";
     input.loras = [{ path: LORA, scale: 1 }];
   }
